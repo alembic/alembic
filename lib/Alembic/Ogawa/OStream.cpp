@@ -37,9 +37,22 @@
 #include <fstream>
 #include <stdexcept>
 
-// for mingw support
-#if defined _WIN32 || defined _WIN64
-    #include <Windows.h>
+// Detect availability of Windows API at compile time.
+// This ensures <Windows.h> is included only if the host compiler can see it.
+//
+// IMPORTANT: When cross-compiling with MXE (e.g., host = Linux, target = Windows),
+// macros like _WIN32 or _WIN64 are defined for the target, not the host.
+// That means the host OS might be Linux, but _WIN32 is still defined.
+// Using __has_include(<Windows.h>) ensures we only include Windows headers
+// if they are actually available to the host compiler.
+//
+// NOTE: In rare cases, on Linux with manually installed MinGW headers, 
+// __has_include(<Windows.h>) may return true even though the host OS is not Windows.
+#if __has_include(<Windows.h>)
+#  define _HAS_WINDOWS_API 1
+#  include <Windows.h>
+#else
+#  define _HAS_WINDOWS_API 0
 #endif
 
 namespace Alembic {
@@ -52,7 +65,7 @@ public:
     PrivateData(const std::string & iFileName) :
         stream(NULL), fileName(iFileName), startPos(0), curPos(0), maxPos(0)
     {
-#ifdef _WIN32
+#if _HAS_WINDOWS_API
         // to wchar_t
         // get the size of the UTF8 string
         int wLength = MultiByteToWideChar(CP_UTF8, 0, fileName.c_str(), -1, NULL, 0);
@@ -77,7 +90,7 @@ public:
         if (filestream->is_open())
         {
             stream = filestream;
-#if defined _WIN32 || defined _WIN64
+#if _HAS_WINDOWS_API
             filestream->rdbuf()->pubsetbuf(buffer, sizeof(buffer));
 #endif
             stream->exceptions ( std::ofstream::failbit |
@@ -120,7 +133,7 @@ public:
         }
     }
 
-#if defined _WIN32 || defined _WIN64
+#if _HAS_WINDOWS_API
     char buffer [STREAM_BUF_SIZE];
 #endif
     std::ostream * stream;
