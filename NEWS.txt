@@ -1,3 +1,25 @@
+2025-3-20, Alembic 1.8.11
+Thanks to your submitted issues and pull requests we have a few bug 
+fixes and build enhancements.
+
+CMake:
+
+The minimum CMake version has been bumped up to 3.29 so that we can simplify
+our requirements for the python bindings.  (PR487)
+
+Add ABI tag to the built extension of PyAlembic (PR482)
+
+Fix deprecated FindBoost module cmake warnings. (PR484)
+
+AbcCoreOgawa:
+
+Address fuzzer case where a maliciously advertised dimensions is much less
+than the available data causing a buffer overrun. (PR494)
+
+Util
+
+Use pre C++17 fallthrough comment hint to silence several warnings. (PR486)
+
 2025-11-17, Alembic 1.8.10
 Thanks to your submitted issues we have a few bug fixes and build
 enhancements.

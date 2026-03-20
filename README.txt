@@ -13,7 +13,7 @@ dependencies:
 
 Required:
 
-    CMake (3.13+) www.cmake.org
+    CMake (3.29+) www.cmake.org
     C++ compiler that supports C++11
     Imath 3 https://github.com/AcademySoftwareFoundation/Imath
 
