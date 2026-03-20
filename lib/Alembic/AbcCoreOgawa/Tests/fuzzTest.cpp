@@ -873,6 +873,13 @@ void testFuzzere53406(bool iUseMMap)
     }
 }
 
+void testBadDimensions(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("fuzzer_ReadDimensions.abc");
+    walkObj(ar->getTop());
+}
+
 void testFuzzerTaoTaoGu3513(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
@@ -975,6 +982,7 @@ void test_walkAllNoThrow(bool iUseMMap)
     walkArchiveNoThrow("fuzzer_issue52939.abc", iUseMMap);
     walkArchiveNoThrow("fuzzer_issue53205.abc", iUseMMap);
     walkArchiveNoThrow("fuzzer_issue53406.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_ReadDimensions.abc", iUseMMap);
     walkArchiveNoThrow("fuzzer_Taotao_Gu_3513.abc", iUseMMap);
     walkArchiveNoThrow("fuzzer_Taotao_Gu_3699.abc", iUseMMap);
     walkArchiveNoThrow("zdi-23700-poc0.abc", iUseMMap);
@@ -1085,9 +1093,13 @@ int main ( int argc, char *argv[] )
     testFuzzerTaoTaoGu3699(true);
     testFuzzerTaoTaoGu3699(false);
 
+    testBadDimensions(true);
+    testBadDimensions(false);
+
     test_walkAllNoThrow(true);
     test_walkAllNoThrow(false);
 
     test_badver_pr463();
+
     return 0;
 }
