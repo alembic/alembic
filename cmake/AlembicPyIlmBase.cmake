@@ -33,16 +33,12 @@
 ##
 ##-*****************************************************************************
 
-SET(PYTHON_VERSION_MAJOR ${PYALEMBIC_PYTHON_MAJOR})
-SET(PYTHON_VERSION_MINOR ${Python${PYALEMBIC_PYTHON_MAJOR}_VERSION_MINOR})
-SET(PYTHON_INCLUDE_DIR ${Python${PYTHON_VERSION_MAJOR}_INCLUDE_DIRS})
-
 FIND_PACKAGE(Imath COMPONENTS PyImath)
 IF (Imath_FOUND)
     SET(ALEMBIC_PYIMATH_LIB Imath::PyImath)
 ELSE()
     # Fallback for older versions of Imath 3 and 3.1
     FIND_PACKAGE(Imath)
-    SET(ALEMBIC_PYIMATH_LIB Imath::PyImath_Python${PYTHON_VERSION_MAJOR}_${PYTHON_VERSION_MINOR})
+    SET(ALEMBIC_PYIMATH_LIB Imath::PyImath_Python${Python_VERSION_MAJOR}_${Python_VERSION_MINOR})
     MESSAGE(STATUS "Found package Imath using: ${ALEMBIC_PYIMATH_LIB}")
 ENDIF()

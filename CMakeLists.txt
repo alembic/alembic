@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.17)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.29)
 
 PROJECT(Alembic VERSION 1.8.10)
 
@@ -67,7 +67,6 @@ OPTION(USE_TESTS "Include Alembic tests" ON)
 OPTION(ALEMBIC_BUILD_LIBS "Build library, if off use external alembic libs" ON)
 OPTION(ALEMBIC_SHARED_LIBS "Build shared libraries" ON)
 OPTION(ALEMBIC_DEBUG_WARNINGS_AS_ERRORS "In debug mode build with warnings as errors" ON)
-SET(PYALEMBIC_PYTHON_MAJOR 3 CACHE STRING "Which major version of python to look for when building PyAlembic")
 
 option(DOCS_PATH
     "Create and install the HTML based API documentation to this location (requires Doxygen)"
@@ -237,10 +236,10 @@ ENDIF()
 # PyAlembic
 IF (USE_PYALEMBIC)
 
-    FIND_PACKAGE(Python${PYALEMBIC_PYTHON_MAJOR} COMPONENTS Interpreter Development)
+    FIND_PACKAGE(Python COMPONENTS Interpreter Development)
 
-    if(Python${PYALEMBIC_PYTHON_MAJOR}_FOUND)
-        MESSAGE(STATUS "Found Python ${Python${PYALEMBIC_PYTHON_MAJOR}_VERSION}")
+    if(Python_FOUND)
+        MESSAGE(STATUS "Found Python ${Python_VERSION}")
         ADD_SUBDIRECTORY(python)
     else()
         MESSAGE(WARNING "Python not found! Skipping PyAlembic")
@@ -321,7 +320,6 @@ info_cfg_option(USE_STATIC_HDF5)
 info_cfg_option(USE_TESTS)
 info_cfg_option(ALEMBIC_SHARED_LIBS)
 info_cfg_option(ALEMBIC_DEBUG_WARNINGS_AS_ERRORS)
-info_cfg_option(PYALEMBIC_PYTHON_MAJOR)
 info_cfg_option(DOCS_PATH)
 MESSAGE("${_config_msg}")
 
