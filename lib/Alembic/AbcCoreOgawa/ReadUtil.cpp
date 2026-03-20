@@ -99,11 +99,11 @@ ReadDimensions( Ogawa::IDataPtr iDims,
             oDim[i] = dims[i];
         }
 
-        // we have less data than what the dimensions suggest
-        // we should, so calculate them based on what we have
+        // we have a different amount of data than what the dimensions
+        // suggest we should, so calculate them based on what we have
         if ( iDataType.getPod() != Alembic::Util::kStringPOD &&
              iDataType.getPod() != Alembic::Util::kWstringPOD &&
-             (iDataType.getNumBytes() * oDim.numPoints() >
+             (iDataType.getNumBytes() * oDim.numPoints() !=
                 iData->getSize() - 16) )
         {
             std::size_t numItems =
