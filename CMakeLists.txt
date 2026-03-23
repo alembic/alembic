@@ -331,3 +331,15 @@ set(CPACK_PACKAGE_CONTACT "Lucas Miller")
 # the future (the example is for Ubuntu 22.04)
 # set(CPACK_DEBIAN_PACKAGE_DEPENDS "libimath-3-1-29")
 include(CPack)
+
+# Generate pkg-config file
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Alembic.pc.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/alembic.pc"
+    @ONLY
+)
+
+install(
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/alembic.pc"
+    DESTINATION lib/pkgconfig
+)
