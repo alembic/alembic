@@ -57,12 +57,18 @@ ReadDimensions( Ogawa::IDataPtr iDims,
                 Util::Dimensions & oDim );
 
 //-*****************************************************************************
+// iNumStrings: for kStringPOD/kWstringPOD arrays, the number of std::string /
+// std::wstring objects that have been allocated in iIntoLocation.  The parse
+// loop is bounded by this value to prevent heap out-of-bounds writes when a
+// crafted file contains more '\0' separators than allocated slots.
+// Callers that do not deal with string arrays may use the default (SIZE_MAX).
 void
 ReadData( void * iIntoLocation,
           Ogawa::IDataPtr iData,
           size_t iThreadId,
           const AbcA::DataType &iDataType,
-          Util::PlainOldDataType iAsPod);
+          Util::PlainOldDataType iAsPod,
+          std::size_t iNumStrings = SIZE_MAX );
 
 //-*****************************************************************************
 void

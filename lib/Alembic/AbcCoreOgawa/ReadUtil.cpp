@@ -1339,7 +1339,8 @@ ReadData( void * iIntoLocation,
           Ogawa::IDataPtr iData,
           size_t iThreadId,
           const AbcA::DataType &iDataType,
-          Util::PlainOldDataType iAsPod)
+          Util::PlainOldDataType iAsPod,
+          std::size_t iNumStrings)
 {
     Alembic::Util::PlainOldDataType curPod = iDataType.getPod();
     ABCA_ASSERT( ( iAsPod == curPod ) || (
@@ -1384,6 +1385,14 @@ ReadData( void * iIntoLocation,
         {
             if ( buf[i] == 0 )
             {
+                // Guard against writing past the allocated array.
+                // A crafted archive can embed more '\0' bytes than the
+                // stored dimension count, which would cause OOB heap writes
+                // through std::string::operator= on unallocated slots.
+                if ( strPos >= iNumStrings )
+                {
+                    break;
+                }
                 strPtr[strPos] = buf + startStr;
                 startStr = i + 1;
                 strPos ++;
@@ -1412,6 +1421,12 @@ ReadData( void * iIntoLocation,
         // strings above
         for ( std::size_t i = 0; i < numChars; ++i )
         {
+            // Guard against writing past the allocated array; same hazard as
+            // the kStringPOD path above.
+            if ( strPos >= iNumStrings )
+            {
+                break;
+            }
             std::wstring & wstr = wstrPtr[strPos];
             if ( buf[i] == 0 )
             {
@@ -1471,8 +1486,13 @@ ReadArraySample( Ogawa::IDataPtr iDims,
 
     oSample = AbcA::AllocateArraySample( iDataType, dims );
 
+    // For string/wstring arrays pass the exact number of allocated slots so
+    // ReadData can bound the null-separator scan.  Non-string types ignore
+    // the parameter (they never enter the string parsing branch).
+    std::size_t numStrings =
+        dims.numPoints() * static_cast<std::size_t>( iDataType.getExtent() );
     ReadData( const_cast<void*>( oSample->getData() ), iData,
-        iThreadId, iDataType, iDataType.getPod() );
+        iThreadId, iDataType, iDataType.getPod(), numStrings );
 }
 
 //-*****************************************************************************
