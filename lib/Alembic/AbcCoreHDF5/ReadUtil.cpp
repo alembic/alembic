@@ -586,8 +586,12 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
         key.origPOD = iDataType.getPod();
         key.readPOD = key.origPOD;
 
-        key.numBytes = Util::PODNumBytes( key.readPOD ) *
-            H5Sget_simple_extent_npoints( dspaceId );
+        uint64_t podSize = Util::PODNumBytes( key.readPOD );
+        hssize_t numPoints = H5Sget_simple_extent_npoints( dspaceId );
+        uint64_t original = static_cast<uint64_t>(podSize) * static_cast<uint64_t>(numPoints);
+        uint64_t tmp;
+        bool ok = Util::TryMultiply(podSize, numPoints, tmp);
+        key.numBytes = ok ? tmp : original;
 
         foundDigest = ReadKey( dsetId, "key", key );
 
