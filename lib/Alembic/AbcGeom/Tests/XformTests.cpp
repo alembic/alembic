@@ -677,6 +677,19 @@ void fuzzer_issue25695(bool iUseMMap)
 }
 
 //-*****************************************************************************
+void malformed_xform()
+{
+        Alembic::AbcCoreFactory::IFactory factory;
+        factory.setOgawaReadStrategy(
+            Alembic::AbcCoreFactory::IFactory::kFileStreams );
+
+        IArchive archive = factory.getArchive( "malformed_xform.abc" );
+        Alembic::AbcGeom::IXform xformObj( archive.getTop(), "xform" );
+        Alembic::AbcGeom::XformSample xs;
+        xformObj.getSchema().get( xs );
+}
+
+//-*****************************************************************************
 int main( int argc, char *argv[] )
 {
     xformOut();
@@ -688,5 +701,6 @@ int main( int argc, char *argv[] )
     issue188();
     fuzzer_issue25695(false);
     fuzzer_issue25695(true);
+    malformed_xform();
     return 0;
 }
