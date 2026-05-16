@@ -261,6 +261,12 @@ void IXformSchema::getChannelValues( const AbcA::index_t iSampleIndex,
         for ( std::size_t j = 0; j < op->getNumChannels();
             ++j, ++chanPos )
         {
+            if (chanPos >= dataVec.size())
+            {
+                return;
+            }
+
+            // we ran out of data because of some malformed data
             op->setChannelValue( j, dataVec[chanPos] );
         }
         ++op;
