@@ -123,7 +123,7 @@ void SprImpl::getSample( index_t iSampleIndex, void * iIntoLocation )
                     data->getSize() - 16 );
     }
 
-    ReadData( iIntoLocation, data, id, dt, dt.getPod() );
+    ReadData( iIntoLocation, data, id, dt, dt.getPod(), dt.getExtent() );
 }
 
 //-*****************************************************************************
