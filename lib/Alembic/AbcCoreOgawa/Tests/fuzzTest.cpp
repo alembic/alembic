@@ -949,7 +949,7 @@ void test_badver_pr463()
 
 void test_walkAllNoThrow(bool iUseMMap)
 {
-
+    walkArchiveNoThrow("bad_strings_ogawa.abc", iUseMMap);
     walkArchiveNoThrow("issue254.abc", iUseMMap);
     walkArchiveNoThrow("issue255.abc", iUseMMap);
     walkArchiveNoThrow("issue256.abc", iUseMMap);

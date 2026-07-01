@@ -1339,7 +1339,8 @@ ReadData( void * iIntoLocation,
           Ogawa::IDataPtr iData,
           size_t iThreadId,
           const AbcA::DataType &iDataType,
-          Util::PlainOldDataType iAsPod)
+          Util::PlainOldDataType iAsPod,
+          size_t iNumData )
 {
     Alembic::Util::PlainOldDataType curPod = iDataType.getPod();
     ABCA_ASSERT( ( iAsPod == curPod ) || (
@@ -1380,7 +1381,7 @@ ReadData( void * iIntoLocation,
         std::size_t startStr = 0;
         std::size_t strPos = 0;
 
-        for ( std::size_t i = 0; i < numChars; ++i )
+        for ( std::size_t i = 0; i < numChars && strPos < iNumData; ++i )
         {
             if ( buf[i] == 0 )
             {
@@ -1404,13 +1405,13 @@ ReadData( void * iIntoLocation,
 
         std::size_t numChars = ( dataSize - 16 ) / 4;
         Util::uint32_t * buf = new Util::uint32_t[ numChars ];
-        iData->read( dataSize - 16, buf, 16, iThreadId );
+        iData->read( numChars * 4, buf, 16, iThreadId );
 
         std::size_t strPos = 0;
 
         // push these one at a time until we can figure out how to cast like
         // strings above
-        for ( std::size_t i = 0; i < numChars; ++i )
+        for ( std::size_t i = 0; i < numChars && strPos < iNumData; ++i )
         {
             std::wstring & wstr = wstrPtr[strPos];
             if ( buf[i] == 0 )
@@ -1470,9 +1471,9 @@ ReadArraySample( Ogawa::IDataPtr iDims,
     ReadDimensions( iDims, iData, iThreadId, iDataType, dims );
 
     oSample = AbcA::AllocateArraySample( iDataType, dims );
-
+    size_t numPODs = dims.numPoints() * iDataType.getExtent();
     ReadData( const_cast<void*>( oSample->getData() ), iData,
-        iThreadId, iDataType, iDataType.getPod() );
+        iThreadId, iDataType, iDataType.getPod(), numPODs );
 }
 
 //-*****************************************************************************
