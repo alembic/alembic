@@ -128,3 +128,4 @@ ADD_EXECUTABLE(playground PlayGround.cpp)
 TARGET_LINK_LIBRARIES(playground Alembic)
 
 file(COPY fuzzer_issue25695.abc DESTINATION .)
+file(COPY malformed_xform.abc DESTINATION .)
