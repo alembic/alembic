@@ -1405,7 +1405,7 @@ ReadData( void * iIntoLocation,
 
         std::size_t numChars = ( dataSize - 16 ) / 4;
         Util::uint32_t * buf = new Util::uint32_t[ numChars ];
-        iData->read( dataSize - 16, buf, 16, iThreadId );
+        iData->read( numChars * 4, buf, 16, iThreadId );
 
         std::size_t strPos = 0;
 
