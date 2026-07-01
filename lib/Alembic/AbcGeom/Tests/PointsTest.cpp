@@ -547,6 +547,71 @@ void sparseTest()
 }
 
 //-*****************************************************************************
+void noIdsTest()
+{
+    std::string name = "pointsNoIdsTest.abc";
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), name );
+        TimeSampling ts(1.0/24.0, 0.0);
+        Alembic::Util::uint32_t tsidx = archive.addTimeSampling(ts);
+        OPoints ptObj( OObject( archive, kTop ), "pts", tsidx );
+        OPointsSchema &pt= ptObj.getSchema();
+
+        size_t numVerts = 10;
+        std::vector<V3f> verts( numVerts );
+        for ( size_t i = 0; i < numVerts; ++i )
+        {
+            verts[i] = V3f( i, i * 2.0, i * 3.0 );
+        }
+
+        OPointsSchema::Sample samp;
+        samp.setPositions( P3fArraySample( verts ) );
+
+        for ( size_t i = 0; i < 2; ++i )
+        {
+            pt.set( samp );
+            for ( size_t j = 0; j < numVerts; ++j )
+            {
+                verts[j] *= 2;
+            }
+        }
+
+        pt.set( samp );
+
+        for ( size_t i = 0; i < 2; ++i )
+        {
+            pt.set( samp );
+            for ( size_t j = 0; j < numVerts; ++j )
+            {
+                verts[j] *= 2;
+            }
+        }
+
+        pt.set( samp );
+        pt.setFromPrevious();
+        pt.setFromPrevious();
+        pt.setFromPrevious();
+        TESTING_ASSERT( 9 == pt.getNumSamples() );
+    }
+
+    {
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), name );
+
+        IPoints ptsObj( IObject( archive, kTop ), "pts" );
+        IPointsSchema &pts = ptsObj.getSchema();
+        TESTING_ASSERT( 9 == pts.getNumSamples() );
+
+        for ( size_t i = 0; i < 9; ++i )
+        {
+            IPointsSchema::Sample pointSamp;
+            pts.get(pointSamp, i);
+            TESTING_ASSERT( pointSamp.getPositions()->size() == 10 );
+            TESTING_ASSERT( pointSamp.getIds()->size() == 0 );
+        }
+    }
+}
+
+//-*****************************************************************************
 //-*****************************************************************************
 //-*****************************************************************************
 // Particles Test
@@ -584,5 +649,6 @@ int main( int argc, char *argv[] )
 
     sparseTest();
 
+    noIdsTest();
     return 0;
 }

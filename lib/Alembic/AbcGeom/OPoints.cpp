@@ -126,11 +126,18 @@ void OPointsSchema::set( const Sample &iSamp )
     if ( m_numSamples == 0 )
     {
         // First sample must be valid on all points.
-        ABCA_ASSERT( iSamp.getPositions() &&
-                     iSamp.getIds(),
-                     "Sample 0 must have valid data for points and ids" );
+        ABCA_ASSERT( iSamp.getPositions(),
+                     "Sample 0 must have valid data for points" );
         m_positionsProperty.set( iSamp.getPositions() );
-        m_idsProperty.set( iSamp.getIds() );
+
+        if ( !iSamp.getIds() )
+        {
+            // use an empty sample
+            std::vector<uint64_t> emptyInt64Vec;
+            UInt64ArraySample emptyInt64ArraySamp( emptyInt64Vec );
+            m_idsProperty.set( emptyInt64ArraySamp );
+        }
+        else { m_idsProperty.set( iSamp.getIds() ); }
 
         if ( m_velocitiesProperty )
         { m_velocitiesProperty.set( iSamp.getVelocities() ); }
