@@ -198,11 +198,19 @@ bool AprImpl::readKey( hid_t iGroup,
             DtypeCloser dtypeCloser( dsetFtype );
 
             // string arrays get packed together
-            oKey.numBytes *= H5Tget_size( dsetFtype );
+            hsize_t typeSize = H5Tget_size( dsetFtype );
+            uint64_t original = static_cast<uint64_t>(oKey.numBytes) * static_cast<uint64_t>(typeSize);
+            uint64_t tmp;
+            bool ok = Util::TryMultiply(oKey.numBytes, typeSize, tmp);
+            oKey.numBytes = ok ? tmp : original;
         }
         else
         {
-            oKey.numBytes *= PODNumBytes(dataType.getPod());
+            size_t podSize = PODNumBytes(dataType.getPod());
+            uint64_t original = static_cast<uint64_t>(oKey.numBytes) * static_cast<uint64_t>(podSize);
+            uint64_t tmp;
+            bool ok = Util::TryMultiply(oKey.numBytes, podSize, tmp);
+            oKey.numBytes = ok ? tmp : original;
         }
 
         return true;

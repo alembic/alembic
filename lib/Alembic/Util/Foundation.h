@@ -218,6 +218,23 @@ private:
     mutex & m;
 };
 
+inline bool TryMultiply(uint64_t a, uint64_t b, uint64_t& out)
+{
+    if (a == 0 || b == 0)
+    {
+        out = 0;
+        return true;
+    }
+
+    if (a > std::numeric_limits<uint64_t>::max() / b)
+    {
+        return false;
+    }
+
+    out = a * b;
+    return true;
+}
+
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;

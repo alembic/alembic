@@ -423,8 +423,12 @@ ReadStringArrayT( AbcA::ReadArraySampleCachePtr iCache,
         DtypeCloser dtypeCloser( dsetFtype );
 
         // string arrays get packed together
-        key.numBytes = H5Sget_simple_extent_npoints( dspaceId ) *
-            H5Tget_size( dsetFtype );
+        hssize_t numPoints = H5Sget_simple_extent_npoints( dspaceId );
+        hsize_t typeSize = H5Tget_size( dsetFtype );
+        uint64_t original = static_cast<uint64_t>(numPoints) * static_cast<uint64_t>(typeSize);
+        uint64_t tmp;
+        bool ok = Util::TryMultiply(numPoints, typeSize, tmp);
+        key.numBytes = ok ? tmp : original;
 
         foundDigest = ReadKey( dsetId, "key", key );
         AbcA::ReadArraySampleID found = iCache->find( key );
