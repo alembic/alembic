@@ -1,4 +1,20 @@
-2025-3-20, Alembic 1.8.11
+2026-7-1, Alembic 1.8.12
+Thanks to your submitted issues and pull requests we have a few bug 
+fixes and build enhancements.
+
+AbcCoreOgawa:
+
+Avoid a buffer overrun when reading maliciously formed string and wstring 
+samples. (PR500)
+
+AbcGeom:
+
+Protect against a buffer overrun when filling xform op channels. (PR497)
+
+When writing samples for OPoints, if no ids are given just write an empty
+sample. (PR501)
+
+2026-3-20, Alembic 1.8.11
 Thanks to your submitted issues and pull requests we have a few bug 
 fixes and build enhancements.
 
