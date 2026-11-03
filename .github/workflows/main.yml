@@ -101,7 +101,7 @@ jobs:
         build: [1, 2, 3, 4]
         include:
           # --------------------------------------------------------------------
-          # MacOS 14
+          # MacOS 15
           # --------------------------------------------------------------------
           # Release
           - build: 1
@@ -109,7 +109,7 @@ jobs:
             build-type: Release
             build-shared: 'ON'
             cxx-standard: 17
-            osver: 14
+            osver: 15
 
           # Debug
           - build: 2
@@ -117,7 +117,7 @@ jobs:
             build-type: Debug
             build-shared: 'ON'
             cxx-standard: 17
-            osver: 14
+            osver: 15
 
           # Release
           - build: 3
@@ -125,7 +125,7 @@ jobs:
             build-type: Release
             build-shared: 'ON'
             cxx-standard: 17
-            osver: 14
+            osver: 15
 
           # Debug
           - build: 4
@@ -133,7 +133,7 @@ jobs:
             build-type: Debug
             build-shared: 'ON'
             cxx-standard: 17
-            osver: 14
+            osver: 15
 
     steps:
       - name: Checkout
