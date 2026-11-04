@@ -36,9 +36,6 @@
 
 #include <Alembic/AbcGeom/All.h>
 
-#ifdef ALEMBIC_WITH_HDF5
-#include <Alembic/AbcCoreHDF5/All.h>
-#endif
 
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcCoreFactory/All.h>
@@ -1239,14 +1236,6 @@ int main( int argc, char *argv[] )
                 Alembic::AbcCoreOgawa::WriteArchive(),
                 fileName, appWriter, userStr, md, ErrorHandler::kThrowPolicy);
         }
-#ifdef ALEMBIC_WITH_HDF5
-        else if (coreType == Alembic::AbcCoreFactory::IFactory::kHDF5)
-        {
-            oArchive = CreateArchiveWithInfo(
-                Alembic::AbcCoreHDF5::WriteArchive(),
-                fileName, appWriter, userStr, md, ErrorHandler::kThrowPolicy);
-        }
-#endif
 
         OObject oRoot = oArchive.getTop();
         if (!oRoot.valid())

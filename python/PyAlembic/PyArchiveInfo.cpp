@@ -59,17 +59,7 @@ static Abc::OArchive CreateArchiveWithInfoWrapper(
     }
     else
     {
-#ifdef ALEMBIC_WITH_HDF5
-        return Abc::CreateArchiveWithInfo(
-            ::Alembic::AbcCoreHDF5::WriteArchive(),
-            iFileName,
-            iApplicationWriter,
-            iUserDescription,
-            iArg0,
-            iArg1 );
-#else
         throwPythonException( "Unsupported core type: HDF5" );
-#endif
     }
 
     return Abc::OArchive();
@@ -98,18 +88,7 @@ static Abc::OArchive CreateArchiveWithInfoWrapperDCCFPS(
     }
     else
     {
-#ifdef ALEMBIC_WITH_HDF5
-        return Abc::CreateArchiveWithInfo(
-            ::Alembic::AbcCoreHDF5::WriteArchive(),
-            iFileName,
-            iDCCFPS,
-            iApplicationWriter,
-            iUserDescription,
-            iArg0,
-            iArg1 );
-#else
         throwPythonException( "Unsupported core type: HDF5" );
-#endif
     }
 
     return Abc::OArchive();

@@ -179,7 +179,7 @@ using std::wstring;
 //!
 //! These are always represented in the endian-ness of the host machine when
 //! resident in working memory, but need to have an explicit endian-ness when
-//! being written out. That's hidden from the user by HDF5.
+//! being written out. That's handled by the file format writers.
 enum PlainOldDataType
 {
     //! Booleans are difficult to store in arrays in a 'one bit per bool'

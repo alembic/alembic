@@ -38,10 +38,6 @@
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
 
-#ifdef ALEMBIC_WITH_HDF5
-#include <Alembic/AbcCoreHDF5/All.h>
-#endif
-
 namespace Abc = Alembic::Abc;
 using namespace Abc;
 
@@ -53,25 +49,14 @@ namespace AbcF = Alembic::AbcCoreFactory;
 //  properties
 //
 
-void writeProperty(const std::string &archiveName, bool useOgawa)
+void writeProperty(const std::string &archiveName)
 {
     const unsigned int numSamples = 5;
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
-    OArchive archive;
-    if (useOgawa)
-    {
-        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
-            archiveName, ErrorHandler::kThrowPolicy );
-    }
-#ifdef ALEMBIC_WITH_HDF5
-    else
-    {
-        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-            archiveName, ErrorHandler::kThrowPolicy );
-    }
-#endif
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+        archiveName, ErrorHandler::kThrowPolicy );
 
     OObject archiveTop = archive.getTop();
 
@@ -178,31 +163,17 @@ int main( int argc, char *argv[] )
 {
     // Write and read a simple archive: ten children, each with one
     //  simple property
-    bool useOgawa = true;
     try
     {
         std::string archiveName("identity_sampling_test.abc");
-        useOgawa = true;
-        writeProperty ( archiveName, useOgawa );
+        writeProperty ( archiveName );
         readProperty  ( archiveName );
-#ifdef ALEMBIC_WITH_HDF5
-        useOgawa = false;
-        writeProperty ( archiveName, useOgawa );
-        readProperty  ( archiveName );
-#endif
     }
     catch (char * str )
     {
         std::cout << "Exception raised: " << str;
         std::cout << " during uniform sampling test ";
-        if (useOgawa)
-        {
-            std::cout << "using Ogawa" << std::endl;
-        }
-        else
-        {
-            std::cout << "using HDF5" << std::endl;
-        }
+        std::cout << "using Ogawa" << std::endl;
         return 1;
     }
 

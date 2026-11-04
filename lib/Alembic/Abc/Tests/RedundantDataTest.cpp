@@ -42,10 +42,6 @@
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
-#ifdef ALEMBIC_WITH_HDF5
-#include <Alembic/AbcCoreHDF5/All.h>
-#endif
-
 namespace Abc = Alembic::Abc;
 using namespace Abc;
 
@@ -131,21 +127,10 @@ void readDeepHierarchy( IObject parent, const int level, const IObject& orig )
 }
 
 //-*****************************************************************************
-void simpleTestOut( const std::string &iArchiveName, bool useOgawa )
+void simpleTestOut( const std::string &iArchiveName )
 {
-    OArchive archive;
-    if (useOgawa)
-    {
-        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
-            iArchiveName, ErrorHandler::kThrowPolicy );
-    }
-#ifdef ALEMBIC_WITH_HDF5
-    else
-    {
-        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-            iArchiveName, ErrorHandler::kThrowPolicy );
-    }
-#endif
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+        iArchiveName, ErrorHandler::kThrowPolicy );
 
     OObject archiveTop( archive, kTop );
 
@@ -192,17 +177,8 @@ int main( int argc, char *argv[] )
     // make the int array sample values
     makeIntArraySamp();
 
-    bool useOgawa = true;
-    simpleTestOut( arkive, useOgawa );
+    simpleTestOut( arkive );
     simpleTestIn( arkive );
-
-    PATHS.clear();
-
-#ifdef ALEMBIC_WITH_HDF5
-    useOgawa = false;
-    simpleTestOut( arkive, useOgawa );
-    simpleTestIn( arkive );
-#endif
 
     return 0;
 }

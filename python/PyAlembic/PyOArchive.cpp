@@ -44,11 +44,7 @@ static Abc::OArchive* mkOArchive( const std::string &iName,
 {
     if ( !asOgawa )
     {
-#ifdef ALEMBIC_WITH_HDF5
-        return new Abc::OArchive( AbcH::WriteArchive(), iName );
-#else
         throwPythonException( "Unsupported core type: HDF5" );
-#endif
     }
 
     return new Abc::OArchive( AbcO::WriteArchive(), iName );

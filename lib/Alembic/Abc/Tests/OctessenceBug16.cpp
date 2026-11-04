@@ -45,8 +45,9 @@ using Alembic::AbcCoreAbstract::index_t;
 
 //
 // The tests in this file were originally intended to demonstrate
-// Alembic Issue 16  "memcpy error in Alembic::HDF5::Attribute::writeAll"
-// revealed by valgrind testing.  We'll test this with Ogawa instead
+// Alembic Issue 16  "memcpy error in the legacy backend's
+// Attribute::writeAll" revealed by valgrind testing.  We'll test this
+// with Ogawa instead
 //
 
 void writeSimpleProperties(const std::string &archiveName)

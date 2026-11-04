@@ -43,10 +43,6 @@
 
 #include <limits>
 
-#ifdef ALEMBIC_WITH_HDF5
-#include <Alembic/AbcCoreHDF5/All.h>
-#endif
-
 namespace Abc = Alembic::Abc;
 namespace AbcF = Alembic::AbcCoreFactory;
 using namespace Abc;
@@ -66,21 +62,10 @@ static const chrono_t CHRONO_EPSILON = \
     std::numeric_limits<chrono_t>::epsilon() * 32.0;
 
 //-*****************************************************************************
-void simpleTestOut( const std::string &iArchiveName, bool useOgawa )
+void simpleTestOut( const std::string &iArchiveName )
 {
-    OArchive archive;
-    if (useOgawa)
-    {
-        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
-            iArchiveName, ErrorHandler::kThrowPolicy );
-    }
-#ifdef ALEMBIC_WITH_HDF5
-    else
-    {
-        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-            iArchiveName, ErrorHandler::kThrowPolicy );
-    }
-#endif
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+        iArchiveName, ErrorHandler::kThrowPolicy );
 
     OObject archiveTop( archive, kTop );
 
@@ -285,14 +270,13 @@ void simpleTestOut( const std::string &iArchiveName, bool useOgawa )
 }
 
 //-*****************************************************************************
-void simpleTestIn( const std::string &iArchiveName, bool useOgawa)
+void simpleTestIn( const std::string &iArchiveName)
 {
     AbcF::IFactory factory;
     factory.setPolicy(  ErrorHandler::kThrowPolicy );
     AbcF::IFactory::CoreType coreType;
     IArchive archive = factory.getArchive(iArchiveName, coreType);
-    TESTING_ASSERT( (useOgawa && coreType == AbcF::IFactory::kOgawa) ||
-                    (!useOgawa && coreType == AbcF::IFactory::kHDF5) );
+    TESTING_ASSERT( coreType == AbcF::IFactory::kOgawa );
 
     IObject archiveTop = archive.getTop();
 
@@ -517,15 +501,8 @@ int main( int argc, char *argv[] )
 {
     const std::string arkive( "test2archive.abc" );
 
-    bool useOgawa = true;
-    simpleTestOut( arkive, useOgawa );
-    simpleTestIn( arkive, useOgawa );
-
-#ifdef ALEMBIC_WITH_HDF5
-    useOgawa = false;
-    simpleTestOut( arkive, useOgawa );
-    simpleTestIn( arkive, useOgawa );
-#endif
+    simpleTestOut( arkive );
+    simpleTestIn( arkive );
 
     return 0;
 }

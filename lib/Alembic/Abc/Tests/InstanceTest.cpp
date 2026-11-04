@@ -40,10 +40,6 @@
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
-#ifdef ALEMBIC_WITH_HDF5
-#include <Alembic/AbcCoreHDF5/All.h>
-#endif
-
 namespace Abc = Alembic::Abc;
 using namespace Abc;
 
@@ -55,21 +51,10 @@ using Alembic::Util::uint32_t;
 using Alembic::Util::float32_t;
 
 //-*****************************************************************************
-void simpleTestOut( const std::string& iArchiveName, bool useOgawa )
+void simpleTestOut( const std::string& iArchiveName )
 {
-    OArchive archive;
-    if (useOgawa)
-    {
-        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
-            iArchiveName, ErrorHandler::kThrowPolicy );
-    }
-#ifdef ALEMBIC_WITH_HDF5
-    else
-    {
-        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-            iArchiveName, ErrorHandler::kThrowPolicy );
-    }
-#endif
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+        iArchiveName, ErrorHandler::kThrowPolicy );
 
     /*
                x1
@@ -240,7 +225,7 @@ void simpleTestIn( const std::string& iArchiveName )
 }
 
 //-*****************************************************************************
-void diabolicalInstance( const std::string& iArchiveName, bool useOgawa )
+void diabolicalInstance( const std::string& iArchiveName )
 {
     /*
                a0  b0 (points to a0)
@@ -251,19 +236,8 @@ void diabolicalInstance( const std::string& iArchiveName, bool useOgawa )
     */
 
 {
-    OArchive archive;
-    if (useOgawa)
-    {
-        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
-            iArchiveName, ErrorHandler::kThrowPolicy );
-    }
-#ifdef ALEMBIC_WITH_HDF5
-    else
-    {
-        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-            iArchiveName, ErrorHandler::kThrowPolicy );
-    }
-#endif
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+        iArchiveName, ErrorHandler::kThrowPolicy );
 
     OObject topobj = archive.getTop();
 
@@ -419,22 +393,12 @@ void diabolicalInstance( const std::string& iArchiveName, bool useOgawa )
 int main( int argc, char* argv[] )
 {
     const std::string oarkhive( "instancetest_ogawa.abc" );
-    const std::string harkhive( "insatncetest_hdf5.abc" );
 
     const std::string oarkhive2( "diabolical.instancet_ogawa.abc" );
-    const std::string harkhive2( "diabolical.instancet_hdf5.abc" );
 
-    bool useOgawa = true;
-    simpleTestOut( oarkhive, useOgawa );
+    simpleTestOut( oarkhive );
     simpleTestIn( oarkhive );
-    diabolicalInstance( oarkhive2, useOgawa );
-
-#ifdef ALEMBIC_WITH_HDF5
-    useOgawa = false;
-    simpleTestOut( harkhive, useOgawa );
-    simpleTestIn( harkhive );
-    diabolicalInstance( harkhive2, useOgawa );
-#endif
+    diabolicalInstance( oarkhive2 );
 
     return 0;
 }

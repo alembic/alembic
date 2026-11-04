@@ -36,9 +36,6 @@
 
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreAbstract/All.h>
-#ifdef ALEMBIC_WITH_HDF5
-#include <Alembic/AbcCoreHDF5/All.h>
-#endif
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcCoreFactory/All.h>
 #include <Alembic/AbcCollection/All.h>
@@ -768,8 +765,6 @@ int main( int argc, char *argv[] )
 
             if ( coreType == AbcF::IFactory::kOgawa ) {
                 coreName = "Ogawa";
-            } else if ( coreType == AbcF::IFactory::kHDF5 ) {
-                coreName = "HDF5";
             } else {
                 coreName = "Unknown";
             };

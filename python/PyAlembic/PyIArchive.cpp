@@ -38,7 +38,6 @@
 
 using namespace boost::python;
 
-const std::string kHDF5 = "HDF5";
 const std::string kOgawa = "Ogawa";
 const std::string kLayer = "Layer";
 const std::string kUnknown = "Unknown";
@@ -55,11 +54,6 @@ static Abc::IArchive* mkIArchive( const std::string &iName )
     if ( coreType == AbcF::IFactory::kUnknown ) {
         throwPythonException( "Unknown core type" );
     }
-#ifndef ALEMBIC_WITH_HDF5
-    else if ( coreType == AbcF::IFactory::kHDF5 ) {
-        throwPythonException( "Unsupported core type: HDF5" );
-    }
-#endif
     return new Abc::IArchive( archive );
 }
 
@@ -81,11 +75,6 @@ static Abc::IArchive* mkLayeredIArchive( boost::python::list &iNames )
     if ( coreType == AbcF::IFactory::kUnknown ) {
         throwPythonException( "Unknown core type" );
     }
-#ifndef ALEMBIC_WITH_HDF5
-    else if ( coreType == AbcF::IFactory::kHDF5 ) {
-        throwPythonException( "Unsupported core type: HDF5" );
-    }
-#endif
     return new Abc::IArchive( archive );
 }
 
@@ -99,8 +88,6 @@ static std::string getCoreType( Abc::IArchive& archive )
 
     if ( coreType == AbcF::IFactory::kOgawa ) {
         return kOgawa;
-    } else if ( coreType == AbcF::IFactory::kHDF5 ) {
-        return kHDF5;
     } else {
         return kUnknown;
     };
@@ -112,7 +99,6 @@ void register_iarchive()
 
     // export the CoreType constants
     //
-    scope().attr("kHDF5") = kHDF5;
     scope().attr("kOgawa") = kOgawa;
     scope().attr("kLayer") = kLayer;
     scope().attr("kUnknown") = kUnknown;
