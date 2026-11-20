@@ -161,7 +161,7 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
 
         // if number of vertices were specified, then the basis and type
         // was specified
-        if ( m_nVerticesProperty )
+        if ( iSamp.getCurvesNumVertices() )
         {
             m_basisAndTypeProperty.set( basisAndType );
         }

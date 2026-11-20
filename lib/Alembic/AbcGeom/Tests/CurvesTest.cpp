@@ -220,6 +220,55 @@ void Example2_CurvesIn()
 }
 
 //-*****************************************************************************
+void positionOnlyTest()
+{
+    std::string name = "positionOnlyCurvesTest.abc";
+    V3f p0[] = { V3f( 0, 0, 0 ), V3f( 1, 0, 0 ),
+                 V3f( 1, 1, 0 ), V3f( 0, 1, 0 ) };
+    V3f p1[] = { V3f( 0, 0, 1 ), V3f( 1, 0, 1 ),
+                 V3f( 1, 1, 1 ), V3f( 0, 1, 1 ) };
+    int32_t count[] = { 4 };
+
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), name );
+        OCurves curves( archive.getTop(), "curves" );
+        OCurvesSchema::Sample sample(
+            P3fArraySample( p0, 4 ), Int32ArraySample( count, 1 ),
+            kLinear, kPeriodic );
+        sample.setBasis( kNoBasis );
+        curves.getSchema().set( sample );
+        curves.getSchema().set(
+            OCurvesSchema::Sample( P3fArraySample( p1, 4 ) ) );
+
+        // Explicit topology can still change type, wrap and basis.
+        curves.getSchema().set( OCurvesSchema::Sample(
+            P3fArraySample( p1, 4 ), Int32ArraySample( count, 1 ) ) );
+    }
+
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), name );
+    ICurves curves( archive.getTop(), "curves" );
+    TESTING_ASSERT( curves.getSchema().getNumSamples() == 3 );
+    for ( index_t i = 0; i < 3; ++i )
+    {
+        ICurvesSchema::Sample sample =
+            curves.getSchema().getValue( ISampleSelector( i ) );
+        TESTING_ASSERT( sample.getType() == ( i < 2 ? kLinear : kCubic ) );
+        TESTING_ASSERT( sample.getWrap() ==
+                        ( i < 2 ? kPeriodic : kNonPeriodic ) );
+        TESTING_ASSERT( sample.getBasis() ==
+                        ( i < 2 ? kNoBasis : kBezierBasis ) );
+        TESTING_ASSERT( sample.getCurvesNumVertices()->size() == 1 );
+        TESTING_ASSERT( ( *sample.getCurvesNumVertices() )[0] == 4 );
+        TESTING_ASSERT( sample.getPositions()->size() == 4 );
+        for ( size_t j = 0; j < 4; ++j )
+        {
+            TESTING_ASSERT( ( *sample.getPositions() )[j] ==
+                            ( i == 0 ? p0[j] : p1[j] ) );
+        }
+    }
+}
+
+//-*****************************************************************************
 void sparseTest()
 {
     std::string name = "sparseCurveTest.abc";
@@ -305,6 +354,7 @@ int main( int argc, char *argv[] )
     Example2_CurvesOut();
     Example2_CurvesIn();
 
+    positionOnlyTest();
     sparseTest();
 
     return 0;
