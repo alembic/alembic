@@ -64,6 +64,7 @@ OPTION(USE_PYALEMBIC "Include PyAlembic stuff" OFF)
 OPTION(USE_STATIC_BOOST "Build with static Boost libs" OFF)
 OPTION(USE_STATIC_HDF5 "Build with static HDF5 libs" OFF)
 OPTION(USE_TESTS "Include Alembic tests" ON)
+OPTION(ALEMBIC_BUILD_FUZZERS "Build Alembic fuzzers" OFF)
 OPTION(ALEMBIC_BUILD_LIBS "Build library, if off use external alembic libs" ON)
 OPTION(ALEMBIC_SHARED_LIBS "Build shared libraries" ON)
 OPTION(ALEMBIC_DEBUG_WARNINGS_AS_ERRORS "In debug mode build with warnings as errors" ON)
@@ -231,6 +232,10 @@ IF (ALEMBIC_BUILD_LIBS)
 ELSE()
     FIND_PACKAGE(Alembic REQUIRED CONFIG HINTS ${ALEMBIC_ROOT})
     MESSAGE(STATUS "Using external Alembic")
+ENDIF()
+
+IF (ALEMBIC_BUILD_FUZZERS)
+    ADD_SUBDIRECTORY(tests/fuzz)
 ENDIF()
 
 # PyAlembic
