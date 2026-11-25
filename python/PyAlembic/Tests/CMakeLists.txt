@@ -35,7 +35,6 @@
 
 SET(TEST_LIBS
     Alembic::Alembic
-    ${HDF5_LIBRARIES}
     Imath::Imath
     ${ALEMBIC_PYIMATH_LIB}
     ${CMAKE_THREAD_LIBS_INIT}

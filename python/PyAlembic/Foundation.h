@@ -40,9 +40,6 @@
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/Util/Config.h>
-#ifdef ALEMBIC_WITH_HDF5
-#include <Alembic/AbcCoreHDF5/All.h>
-#endif
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcCoreFactory/All.h>
 #include <Alembic/AbcCollection/All.h>
@@ -79,9 +76,6 @@ inline T * get_pointer( Alembic::Util::shared_ptr<T> const & p )
 namespace Abc  = ::Alembic::Abc;
 namespace AbcA = ::Alembic::AbcCoreAbstract;
 namespace AbcF = ::Alembic::AbcCoreFactory;
-#ifdef ALEMBIC_WITH_HDF5
-namespace AbcH = ::Alembic::AbcCoreHDF5;
-#endif
 namespace AbcO = ::Alembic::AbcCoreOgawa;
 namespace AbcC = ::Alembic::AbcCollection;
 namespace AbcG = ::Alembic::AbcGeom;

@@ -40,10 +40,6 @@
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
-#ifdef ALEMBIC_WITH_HDF5
-#include <Alembic/AbcCoreHDF5/All.h>
-#endif
-
 namespace AbcF = Alembic::AbcCoreFactory;
 
 namespace Abc = Alembic::Abc;
@@ -60,7 +56,7 @@ using Alembic::Util::uint32_t;
 //
 
 
-void writeSimpleProperties(const std::string &archiveName, bool useOgawa)
+void writeSimpleProperties(const std::string &archiveName)
 {
     const int numChildren = 3;
 
@@ -71,19 +67,8 @@ void writeSimpleProperties(const std::string &archiveName, bool useOgawa)
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
-    OArchive archive;
-    if (useOgawa)
-    {
-        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
-            archiveName, ErrorHandler::kThrowPolicy );
-    }
-#ifdef ALEMBIC_WITH_HDF5
-    else
-    {
-        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-            archiveName, ErrorHandler::kThrowPolicy );
-    }
-#endif
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+        archiveName, ErrorHandler::kThrowPolicy );
 
     OObject archiveTop = archive.getTop();
 
@@ -392,25 +377,14 @@ void readSimpleProperties(const std::string &archiveName)
 //////////////////
 
 
-void writeEmptyCompoundProperties(const std::string &archiveName, bool useOgawa)
+void writeEmptyCompoundProperties(const std::string &archiveName)
 {
     const int numChildren = 2;
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
-    OArchive archive;
-    if (useOgawa)
-    {
-        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
-            archiveName, ErrorHandler::kThrowPolicy );
-    }
-#ifdef ALEMBIC_WITH_HDF5
-    else
-    {
-        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-            archiveName, ErrorHandler::kThrowPolicy );
-    }
-#endif
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+        archiveName, ErrorHandler::kThrowPolicy );
 
     OObject archiveTop = archive.getTop();
 
@@ -502,34 +476,20 @@ void readEmptyCompoundProperties(const std::string &archiveName)
 
 int main( int argc, char *argv[] )
 {
-    bool useOgawa = true;
     try
     {
         std::cout << "Write and read a simple archive: ten children, ";
         std::cout << "each with one simple property" << std::endl;
 
         std::string archiveName("flatHierarchyProp.abc");
-        useOgawa = true;
-        writeSimpleProperties ( archiveName, useOgawa );
+        writeSimpleProperties ( archiveName );
         readSimpleProperties  ( archiveName );
-#ifdef ALEMBIC_WITH_HDF5
-        useOgawa = false;
-        writeSimpleProperties ( archiveName, useOgawa );
-        readSimpleProperties  ( archiveName );
-#endif
     }
     catch (char * str )
     {
         std::cout << "Exception raised: " << str;
         std::cout << " during *FlatHierarchy tests ";
-        if (useOgawa)
-        {
-            std::cout << " using Ogawa" << std::endl;
-        }
-        else
-        {
-            std::cout << " using HDF5" << std::endl;
-        }
+        std::cout << " using Ogawa" << std::endl;
         return 1;
     }
 
@@ -541,28 +501,15 @@ int main( int argc, char *argv[] )
         std::cout << "contains no simple properties" << std::endl;
 
         std::string archiveName("nestedCompounds.abc");
-        useOgawa = true;
-        writeEmptyCompoundProperties ( archiveName, useOgawa );
+        writeEmptyCompoundProperties ( archiveName );
         readEmptyCompoundProperties  ( archiveName );
-#ifdef ALEMBIC_WITH_HDF5
-        useOgawa = false;
-        writeEmptyCompoundProperties ( archiveName, useOgawa );
-        readEmptyCompoundProperties  ( archiveName );
-#endif
 
     }
     catch (char * str )
     {
         std::cout << "Exception raised: " << str;
         std::cout << " during *FlatHierarchy tests";
-        if (useOgawa)
-        {
-            std::cout << " using Ogawa" << std::endl;
-        }
-        else
-        {
-            std::cout << " using HDF5" << std::endl;
-        }
+        std::cout << " using Ogawa" << std::endl;
         return 1;
     }
 

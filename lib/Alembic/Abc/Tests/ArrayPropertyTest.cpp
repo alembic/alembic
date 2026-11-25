@@ -39,10 +39,6 @@
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
-#ifdef ALEMBIC_WITH_HDF5
-#include <Alembic/AbcCoreHDF5/All.h>
-#endif
-
 namespace Abc = Alembic::Abc;
 namespace AbcF = Alembic::AbcCoreFactory;
 using namespace Abc;
@@ -64,26 +60,15 @@ Imath::V3f g_vectors[5] = { Imath::V3f(1,1,1),
                             Imath::V3f(4,4,4),
                             Imath::V3f(5,5,5) };
 
-void writeUInt32ArrayProperty(const std::string &archiveName, bool useOgawa)
+void writeUInt32ArrayProperty(const std::string &archiveName)
 {
     const chrono_t dt = 1.0 / 24.0;
     const chrono_t startTime = 123.0;
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
-    OArchive archive;
-    if (useOgawa)
-    {
-        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
-            archiveName, ErrorHandler::kThrowPolicy );
-    }
-#ifdef ALEMBIC_WITH_HDF5
-    else
-    {
-        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-            archiveName, ErrorHandler::kThrowPolicy );
-    }
-#endif
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+        archiveName, ErrorHandler::kThrowPolicy );
 
     OObject archiveTop = archive.getTop();
 
@@ -114,7 +99,7 @@ void writeUInt32ArrayProperty(const std::string &archiveName, bool useOgawa)
 }
 
 
-void readUInt32ArrayProperty(const std::string &archiveName, bool useOgawa)
+void readUInt32ArrayProperty(const std::string &archiveName)
 {
     // Open an existing archive for reading. Indicate that we want
     //   Alembic to throw exceptions on errors.
@@ -123,8 +108,7 @@ void readUInt32ArrayProperty(const std::string &archiveName, bool useOgawa)
     factory.setPolicy(  ErrorHandler::kThrowPolicy );
     AbcF::IFactory::CoreType coreType;
     IArchive archive = factory.getArchive(archiveName, coreType);
-    TESTING_ASSERT( (useOgawa && coreType == AbcF::IFactory::kOgawa) ||
-                    (!useOgawa && coreType == AbcF::IFactory::kHDF5) );
+    TESTING_ASSERT( coreType == AbcF::IFactory::kOgawa );
 
     IObject archiveTop = archive.getTop();
 
@@ -219,26 +203,15 @@ void readUInt32ArrayProperty(const std::string &archiveName, bool useOgawa)
 ///////////////////////////////////////////////////////////////////////////////
 
 
-void writeV3fArrayProperty(const std::string &archiveName, bool useOgawa)
+void writeV3fArrayProperty(const std::string &archiveName)
 {
     const chrono_t dt = 1.0 / 24.0;
     const chrono_t startTime = 123.0;
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
-    OArchive archive;
-    if (useOgawa)
-    {
-        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
-            archiveName, ErrorHandler::kThrowPolicy );
-    }
-#ifdef ALEMBIC_WITH_HDF5
-    else
-    {
-        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-            archiveName, ErrorHandler::kThrowPolicy );
-    }
-#endif
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+        archiveName, ErrorHandler::kThrowPolicy );
 
     OObject archiveTop = archive.getTop();
 
@@ -289,7 +262,7 @@ void writeV3fArrayProperty(const std::string &archiveName, bool useOgawa)
 }
 
 
-void readV3fArrayProperty(const std::string &archiveName, bool useOgawa)
+void readV3fArrayProperty(const std::string &archiveName)
 {
     // Open an existing archive for reading. Indicate that we want
     //   Alembic to throw exceptions on errors.
@@ -298,8 +271,7 @@ void readV3fArrayProperty(const std::string &archiveName, bool useOgawa)
     factory.setPolicy(  ErrorHandler::kThrowPolicy );
     AbcF::IFactory::CoreType coreType;
     IArchive archive = factory.getArchive(archiveName, coreType);
-    TESTING_ASSERT( (useOgawa && coreType == AbcF::IFactory::kOgawa) ||
-                    (!useOgawa && coreType == AbcF::IFactory::kHDF5) );
+    TESTING_ASSERT( coreType == AbcF::IFactory::kOgawa );
 
     IObject archiveTop = archive.getTop();
 
@@ -388,23 +360,12 @@ void readV3fArrayProperty(const std::string &archiveName, bool useOgawa)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void readWriteColorArrayProperty(const std::string &archiveName, bool useOgawa)
+void readWriteColorArrayProperty(const std::string &archiveName)
 {
 
     {
-        OArchive archive;
-        if (useOgawa)
-        {
-            archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
-                archiveName, ErrorHandler::kThrowPolicy );
-        }
-#ifdef ALEMBIC_WITH_HDF5
-        else
-        {
-            archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-                archiveName, ErrorHandler::kThrowPolicy );
-        }
-#endif
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+            archiveName, ErrorHandler::kThrowPolicy );
 
         OObject archiveTop = archive.getTop();
 
@@ -441,8 +402,7 @@ void readWriteColorArrayProperty(const std::string &archiveName, bool useOgawa)
         factory.setPolicy(  ErrorHandler::kThrowPolicy );
         AbcF::IFactory::CoreType coreType;
         IArchive archive = factory.getArchive(archiveName, coreType);
-        TESTING_ASSERT( (useOgawa && coreType == AbcF::IFactory::kOgawa) ||
-                        (!useOgawa && coreType == AbcF::IFactory::kHDF5) );
+        TESTING_ASSERT( coreType == AbcF::IFactory::kOgawa );
 
         IObject archiveTop = archive.getTop();
 
@@ -498,7 +458,7 @@ void readWriteColorArrayProperty(const std::string &archiveName, bool useOgawa)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void emptyAndValueTest(const std::string &archiveName, bool useOgawa)
+void emptyAndValueTest(const std::string &archiveName)
 {
     std::vector<std::string> strVec;
     strVec.push_back( "potato" );
@@ -518,19 +478,8 @@ void emptyAndValueTest(const std::string &archiveName, bool useOgawa)
     Int32ArraySample emptyIntSamp = Int32ArraySample::emptySample();
 
     {
-        OArchive archive;
-        if (useOgawa)
-        {
-            archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
-                archiveName );
-        }
-#ifdef ALEMBIC_WITH_HDF5
-        else
-        {
-            archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-                archiveName );
-        }
-#endif
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+            archiveName );
 
         OCompoundProperty root = archive.getTop().getProperties();
         OC3fArrayProperty colorProp( root, "colors" );
@@ -594,8 +543,7 @@ void emptyAndValueTest(const std::string &archiveName, bool useOgawa)
         factory.setPolicy(  ErrorHandler::kThrowPolicy );
         AbcF::IFactory::CoreType coreType;
         IArchive archive = factory.getArchive(archiveName, coreType);
-        TESTING_ASSERT( (useOgawa && coreType == AbcF::IFactory::kOgawa) ||
-                        (!useOgawa && coreType == AbcF::IFactory::kHDF5) );
+        TESTING_ASSERT( coreType == AbcF::IFactory::kOgawa );
 
         ICompoundProperty root = archive.getTop().getProperties();
         IC3fArrayProperty colorProp( root, "colors" );
@@ -694,70 +642,38 @@ int main( int argc, char *argv[] )
 {
     // Write and read a simple archive: one child, with one array
     //  property
-    bool useOgawa = true;
 
     try
     {
         // An array of v3fs, written with uniform sampling, some of which
         //  are empty
         std::string archiveName("v3f_array_test.abc");
-        useOgawa = true;
-        writeV3fArrayProperty ( archiveName, useOgawa );
-        readV3fArrayProperty  ( archiveName, useOgawa );
-#ifdef ALEMBIC_WITH_HDF5
-        useOgawa = false;
-        writeV3fArrayProperty ( archiveName, useOgawa );
-        readV3fArrayProperty  ( archiveName, useOgawa );
-#endif
+        writeV3fArrayProperty ( archiveName );
+        readV3fArrayProperty  ( archiveName );
     }
     catch (char * str )
     {
         std::cout << "Exception raised: " << str;
         std::cout << " during UInt array, uniform sampling test ";
-        if ( useOgawa )
-        {
-            std::cout << "with Ogawa" << std::endl;
-        }
-        else
-        {
-            std::cout << "with HDF5" << std::endl;
-        }
+        std::cout << "with Ogawa" << std::endl;
         return 1;
     }
 
-    readWriteColorArrayProperty( "c3_2_array_test.abc", true );
-    emptyAndValueTest( "empty_and_value_prop_test.abc", true );
-
-#ifdef ALEMBIC_WITH_HDF5
-    readWriteColorArrayProperty( "c3_2_array_test.abc", false );
-    emptyAndValueTest( "empty_and_value_prop_test.abc", false );
-#endif
+    readWriteColorArrayProperty( "c3_2_array_test.abc" );
+    emptyAndValueTest( "empty_and_value_prop_test.abc" );
 
     try
     {
         // An array of unsigned ints, written with uniform sampling
         std::string archiveName("uint_array_test.abc");
-        useOgawa = true;
-        writeUInt32ArrayProperty ( archiveName, useOgawa );
-        readUInt32ArrayProperty  ( archiveName, useOgawa);
-#ifdef ALEMBIC_WITH_HDF5
-        useOgawa = false;
-        writeUInt32ArrayProperty ( archiveName, useOgawa );
-        readUInt32ArrayProperty  ( archiveName, useOgawa);
-#endif
+        writeUInt32ArrayProperty ( archiveName );
+        readUInt32ArrayProperty  ( archiveName );
     }
     catch (char * str )
     {
         std::cout << "Exception raised: " << str;
         std::cout << " during UInt array, uniform sampling test ";
-        if ( useOgawa )
-        {
-            std::cout << "with Ogawa" << std::endl;
-        }
-        else
-        {
-            std::cout << "with HDF5" << std::endl;
-        }
+        std::cout << "with Ogawa" << std::endl;
         return 1;
     }
 

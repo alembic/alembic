@@ -73,9 +73,9 @@ INSTALL(FILES ${PUBLIC_H_FILES}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Alembic/AbcClients/WFObjConvert
         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 
-IF (USE_TESTS AND USE_HDF5)
+IF (USE_TESTS)
     ADD_SUBDIRECTORY(Tests)
 ELSE()
-    MESSAGE(STATUS 
-        "Skipping WFObjConvert tests: requires USE_TESTS and USE_HDF5")
+    MESSAGE(STATUS
+        "Skipping WFObjConvert tests: requires USE_TESTS")
 ENDIF()

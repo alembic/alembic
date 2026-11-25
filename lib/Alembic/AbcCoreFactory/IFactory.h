@@ -54,7 +54,6 @@ public:
     //! The type which yielded a valid IArchive (or kUnknown if invalid)
     enum CoreType
     {
-        kHDF5,
         kOgawa,
         kLayer,
         kUnknown
@@ -89,17 +88,7 @@ public:
 
     // TODO, how do we best layer streams, and strings
 
-    //! If opening an HDF5 file, sets whether to use the cached hierarchy
-    //! if it exists, the default value is true
-    void setHDF5CacheHierarchy( bool iCacheHierarchy )
-    {
-        m_cacheHierarchy = iCacheHierarchy;
-    }
-
-    //! Gets whether an HDF5 file will use the cached hierarchy
-    bool getHDF5CacheHierarchy() const { return m_cacheHierarchy; }
-
-    //! Set the array sample cache, the HDF5 implementation optionally uses this
+    //! Set the array sample cache
     void setSampleCache(
         Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCachePtr )
     {
@@ -150,7 +139,6 @@ public:
     }
 
 private:
-    bool m_cacheHierarchy;
     size_t m_numStreams;
     OgawaReadStrategy m_readStrategy;
     Alembic::AbcCoreAbstract::ReadArraySampleCachePtr m_cachePtr;

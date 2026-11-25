@@ -36,9 +36,6 @@
 
 #include "AbcWriteJob.h"
 
-#ifdef ALEMBIC_WITH_HDF5
-#include <Alembic/AbcCoreHDF5/All.h>
-#endif
 
 #include <Alembic/AbcCoreOgawa/All.h>
 namespace
@@ -837,25 +834,10 @@ bool AbcWriteJob::eval(double iFrame)
         MTime sec(1.0, MTime::kSeconds);
         double fps(sec.as(MTime::uiUnit()));
 
-#ifdef ALEMBIC_WITH_HDF5
-        if (mAsOgawa)
-        {
-            mRoot = CreateArchiveWithInfo(Alembic::AbcCoreOgawa::WriteArchive(),
-                mFileName, fps, appWriter, userInfo,
-                Alembic::Abc::ErrorHandler::kThrowPolicy);
-        }
-        else
-        {
-            mRoot = CreateArchiveWithInfo(Alembic::AbcCoreHDF5::WriteArchive(),
-                mFileName, fps, appWriter, userInfo,
-                Alembic::Abc::ErrorHandler::kThrowPolicy);
-        }
-#else
         // just write it out as Ogawa
         mRoot = CreateArchiveWithInfo(Alembic::AbcCoreOgawa::WriteArchive(),
             mFileName, fps, appWriter, userInfo,
             Alembic::Abc::ErrorHandler::kThrowPolicy);
-#endif
 
         mShapeTimeIndex = mRoot.addTimeSampling(*mShapeTime);
         mTransTimeIndex = mRoot.addTimeSampling(*mTransTime);

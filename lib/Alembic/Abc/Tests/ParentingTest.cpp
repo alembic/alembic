@@ -39,10 +39,6 @@
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
-#ifdef ALEMBIC_WITH_HDF5
-#include <Alembic/AbcCoreHDF5/All.h>
-#endif
-
 #include <Imath/ImathMath.h>
 
 #include <limits>
@@ -67,22 +63,11 @@ static const chrono_t CHRONO_EPSILON = \
     std::numeric_limits<chrono_t>::epsilon() * 32.0;
 
 //-*****************************************************************************
-void simpleTestOut( const std::string &iArchiveName, bool useOgawa )
+void simpleTestOut( const std::string &iArchiveName )
 {
 
-    OArchive archive;
-    if (useOgawa)
-    {
-        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
-            iArchiveName, ErrorHandler::kThrowPolicy );
-    }
-#ifdef ALEMBIC_WITH_HDF5
-    else
-    {
-        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-            iArchiveName, ErrorHandler::kThrowPolicy );
-    }
-#endif
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+        iArchiveName, ErrorHandler::kThrowPolicy );
 
     // all child Objects in an Archive are actually children of the single
     // top Object in an Archive
@@ -238,28 +223,16 @@ void simpleTestIn( const std::string &iArchiveName )
     // if the program exits, it means parenting works
 }
 
-void scopingTest(bool useOgawa)
+void scopingTest()
 {
     {
         ODoubleProperty propScalar;
         ODoubleArrayProperty propArray;
         {
 
-            OArchive archive;
-            if (useOgawa)
-            {
-                archive = CreateArchiveWithInfo(
-                    Alembic::AbcCoreOgawa::WriteArchive(), "propScopeTest.abc",
-                    "Alembic test", "", MetaData() );
-            }
-#ifdef ALEMBIC_WITH_HDF5
-            else
-            {
-                archive = CreateArchiveWithInfo(
-                    Alembic::AbcCoreHDF5::WriteArchive(), "propScopeTest.abc",
-                    "Alembic test", "", MetaData() );
-            }
-#endif
+            OArchive archive = CreateArchiveWithInfo(
+                Alembic::AbcCoreOgawa::WriteArchive(), "propScopeTest.abc",
+                "Alembic test", "", MetaData() );
 
             OObject childA( archive.getTop(), "a" );
 
@@ -321,15 +294,8 @@ int main( int argc, char *argv[] )
 {
     const std::string arkive( "parentstest.abc" );
 
-    bool useOgawa = true;
-    simpleTestOut( arkive, useOgawa );
+    simpleTestOut( arkive );
     simpleTestIn( arkive );
-    scopingTest(useOgawa);
-#ifdef ALEMBIC_WITH_HDF5
-    useOgawa = false;
-    simpleTestOut( arkive, useOgawa );
-    simpleTestIn( arkive );
-    scopingTest(useOgawa);
-#endif
+    scopingTest();
     return 0;
 }

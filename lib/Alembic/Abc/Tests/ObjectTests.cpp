@@ -40,10 +40,6 @@
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
-#ifdef ALEMBIC_WITH_HDF5
-#include <Alembic/AbcCoreHDF5/All.h>
-#endif
-
 namespace Abc = Alembic::Abc;
 using namespace Abc;
 
@@ -55,25 +51,14 @@ namespace AbcF = Alembic::AbcCoreFactory;
 //  parent-child hierarchies.
 //
 
-void writeFlatHierarchy(const std::string &archiveName, bool useOgawa)
+void writeFlatHierarchy(const std::string &archiveName)
 {
     const int numChildren = 10;
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
-    OArchive archive;
-    if (useOgawa)
-    {
-        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
-            archiveName, ErrorHandler::kThrowPolicy );
-    }
-#ifdef ALEMBIC_WITH_HDF5
-    else
-    {
-        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-            archiveName, ErrorHandler::kThrowPolicy );
-    }
-#endif
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+        archiveName, ErrorHandler::kThrowPolicy );
 
     OObject archiveTop = archive.getTop();
 
@@ -157,26 +142,15 @@ void recursivelyAddChildren( OObject&           parent,
 }
 
 
-void writeThreeDeepHierarchy(const std::string &archiveName, bool useOgawa)
+void writeThreeDeepHierarchy(const std::string &archiveName)
 {
     const unsigned int numChildren = 2;
     const unsigned int depth = 2; // 1 level at the top
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
-    OArchive archive;
-    if (useOgawa)
-    {
-        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
-            archiveName, ErrorHandler::kThrowPolicy );
-    }
-#ifdef ALEMBIC_WITH_HDF5
-    else
-    {
-        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-            archiveName, ErrorHandler::kThrowPolicy );
-    }
-#endif
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+        archiveName, ErrorHandler::kThrowPolicy );
 
     OObject archiveTop = archive.getTop();
 
@@ -263,33 +237,12 @@ void readDeepHierarchy(const std::string &archiveName)
     // Done - the archive closes itself
 }
 
-void readHierarchyMulti(const std::string &archiveName)
-{
-#ifdef ALEMBIC_WITH_HDF5
-    Abc::IArchive a1(Alembic::AbcCoreHDF5::ReadArchive(), archiveName);
-    {
-        Abc::IArchive a2(Alembic::AbcCoreHDF5::ReadArchive(), archiveName);
-    }
-#endif
-}
-
-void errorHandlerTest(bool useOgawa)
+void errorHandlerTest()
 {
 
     {
-        OArchive archive;
-        if (useOgawa)
-        {
-            archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
-                "throwTest.abc", ErrorHandler::kThrowPolicy );
-        }
-#ifdef ALEMBIC_WITH_HDF5
-        else
-        {
-            archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-                "throwTest.abc", ErrorHandler::kThrowPolicy );
-        }
-#endif
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+            "throwTest.abc", ErrorHandler::kThrowPolicy );
 
         OObject archiveTop = archive.getTop();
         ABCA_ASSERT( archiveTop.getErrorHandler().getPolicy() ==
@@ -351,31 +304,17 @@ int main( int argc, char *argv[] )
 {
     // Write and read a simple archive: ten children, with no
     //  properties
-    bool useOgawa = true;
     try
     {
         std::string archiveName("flatHierarchyObj.abc");
-        useOgawa = true;
-        writeFlatHierarchy ( archiveName, useOgawa );
+        writeFlatHierarchy ( archiveName );
         readFlatHierarchy  ( archiveName );
-#ifdef ALEMBIC_WITH_HDF5
-        useOgawa = false;
-        writeFlatHierarchy ( archiveName, useOgawa );
-        readFlatHierarchy  ( archiveName );
-#endif
     }
     catch (char * str )
     {
         std::cout << "Exception raised: " << str;
         std::cout << " during *FlatHierarchy tests ";
-        if (useOgawa)
-        {
-            std::cout << "use Ogawa" << std::endl;
-        }
-        else
-        {
-            std::cout << "use HDF5" << std::endl;
-        }
+        std::cout << "use Ogawa" << std::endl;
         return 1;
     }
 
@@ -386,15 +325,8 @@ int main( int argc, char *argv[] )
     try
     {
         std::string archiveName("threeDeepHierarchy.abc");
-        useOgawa = true;
-        writeThreeDeepHierarchy ( archiveName, useOgawa );
+        writeThreeDeepHierarchy ( archiveName );
         readDeepHierarchy  ( archiveName );
-
-#ifdef ALEMBIC_WITH_HDF5
-        useOgawa = false;
-        writeThreeDeepHierarchy ( archiveName, useOgawa );
-        readDeepHierarchy  ( archiveName );
-#endif
     }
     catch (char * str )
     {
@@ -403,16 +335,7 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
-    {
-        std::string archiveName("threeDeepHierarchy.abc");
-        readHierarchyMulti(archiveName);
-    }
-
-#ifdef ALEMBIC_WITH_HDF5
-    errorHandlerTest(false);
-#endif
-
-    errorHandlerTest(true);
+    errorHandlerTest();
 
     fuzzer26643_test();
 

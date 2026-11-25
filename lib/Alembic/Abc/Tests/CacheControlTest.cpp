@@ -37,10 +37,6 @@
 #include <Alembic/Abc/All.h>
 #include <iostream>
 
-#ifdef ALEMBIC_WITH_HDF5
-#include <Alembic/AbcCoreHDF5/All.h>
-#endif
-
 namespace Abc = Alembic::Abc;
 using namespace Abc;
 
@@ -49,65 +45,5 @@ using namespace Abc;
 // the different ways of expressing the cache to the IArchives
 int main( int argc, char *argv[] )
 {
-#ifdef ALEMBIC_WITH_HDF5
-    std::string iArchiveBaseName =  "oooooooh_ca-aache_controoo-ool_oooh_oh";
-
-    for ( size_t i = 0 ; i < 3 ; i++ )
-    {
-        std::string iArchiveName = iArchiveBaseName;
-        char a = 'a' + i;
-        iArchiveName += a ;
-        iArchiveName.append( ".abc" );
-
-        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
-                          iArchiveName );
-
-        // all child Objects in an Archive are actually children of the single
-        // top Object in an Archive
-        OObject topobj = archive.getTop();
-
-        // 0th archive child
-        OObject ac0( topobj, "ac0" );
-        // 0th archive child child
-        OObject acc0( ac0, "acc0" );
-    }
-
-    for ( size_t i = 0 ; i < 3 ; i++ )
-    {
-        std::string iArchiveName = iArchiveBaseName;
-        char a = 'a' + i;
-        iArchiveName += a ;
-        iArchiveName.append( ".abc" );
-
-        if ( i == 0 )
-        {
-            // Explicitly specify the implementation and the file name.
-            // A cache is created automatically.
-            IArchive archive1( Alembic::AbcCoreHDF5::ReadArchive(),
-                               iArchiveName );
-        }
-
-        if ( i == 1 )
-        {
-            // Create an implementation with a NULL cache.
-            IArchive archive2( Alembic::AbcCoreHDF5::ReadArchive(),
-                               iArchiveName,
-                               ErrorHandler::kThrowPolicy,
-                               ReadArraySampleCachePtr() );
-        }
-
-        if ( i == 2 )
-        {
-            // Create an implementation with a cache from elsewhere
-            ReadArraySampleCachePtr externalCache =
-                Alembic::AbcCoreHDF5::CreateCache();
-            IArchive archive3( Alembic::AbcCoreHDF5::ReadArchive(),
-                               iArchiveName,
-                               ErrorHandler::kThrowPolicy,
-                               externalCache );
-        }
-    }
-#endif
-
     return 0;
 }

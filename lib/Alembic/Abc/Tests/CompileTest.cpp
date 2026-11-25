@@ -37,10 +37,6 @@
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
 
-#ifdef ALEMBIC_WITH_HDF5
-#include <Alembic/AbcCoreHDF5/All.h>
-#endif
-
 using namespace Alembic::Abc;
 
 // A bunch of minimal compile tests to make sure the templates compile
@@ -206,28 +202,6 @@ int main( int argc, char *argv[] )
 {
 
     std::string archiveName = "compile_test.abc";
-#ifdef ALEMBIC_WITH_HDF5
-    {
-        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
-                          archiveName, ErrorHandler::kNoisyNoopPolicy );
-        OObject archiveTop = archive.getTop();
-        testOSchemaObject( archiveTop );
-        OObject child( archiveTop, "otherChild" );
-        testOSchema( child );
-        testOTypedScalarProperty( child );
-        testOTypedArrayProperty( child );
-    }
-    {
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), archiveName,
-            ErrorHandler::kNoisyNoopPolicy );
-        IObject archiveTop = archive.getTop();
-        testISchemaObject( archiveTop );
-        IObject child( archiveTop, "otherChild" );
-        testISchema( child );
-        testITypedScalarProperty( child );
-        testITypedArrayProperty( child );
-    }
-#endif
 
     {
         OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),

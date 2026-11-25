@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <AbcClients/WFObjConvert/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 #include <iostream>
 #include <stdio.h>
@@ -84,7 +84,7 @@ int main( int argc, char *argv[] )
 
     try
     {
-        Abc::OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+        Abc::OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                                argv[2] );
         Abc::OObject topObj( archive, Abc::kTop );
 

@@ -19,7 +19,6 @@ Required:
 
 Optional:
 
-    HDF5 (1.8.9) www.hdfgroup.org/HDF5
     Boost (1.55+) www.boost.org (to build the python bindings)
     PyImath 3 https://github.com/AcademySoftwareFoundation/Imath (to build the python bindings)
     Arnold (3.3+)
@@ -53,11 +52,6 @@ Some examples of OPTIONS you may want or need to use include:
 
     -DALEMBIC_SHARED_LIBS=OFF  If you want the primary Alembic library to be
     built as a static library, instead of a dynamic one.
-
-    -DUSE_HDF5=ON
-    Specify this if you want to include optional HDF5 support.
-    -DHDF_ROOT=HDF5Path may need to be specified if HDF5 is not installed in
-    a standard location.
 
     -DUSE_MAYA=ON If you want to build AbcExport and AbcImport.
     -DMAYA_ROOT=MayaPath may need to be specified to point at a specific
