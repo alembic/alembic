@@ -40,7 +40,9 @@
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
+#include <cstdio>
 #include <fstream>
+#include <iterator>
 #include <sstream>
 #include <vector>
 
@@ -930,6 +932,282 @@ void testFuzzerTaoTaoGu3699(bool iUseMMap)
     TESTING_ASSERT(0);
 }
 
+static Alembic::Util::uint64_t readU64LE(const std::vector<char>& buf,
+                                         std::size_t off)
+{
+    TESTING_ASSERT(off + 8 <= buf.size());
+    Alembic::Util::uint64_t val = 0;
+    for (std::size_t i = 0; i < 8; ++i)
+    {
+        val |= static_cast<Alembic::Util::uint64_t>(
+            static_cast<unsigned char>(buf[off + i])) << (i * 8);
+    }
+    return val;
+}
+
+static void writeU64LE(std::vector<char>& buf,
+                       std::size_t off,
+                       Alembic::Util::uint64_t val)
+{
+    TESTING_ASSERT(off + 8 <= buf.size());
+    for (std::size_t i = 0; i < 8; ++i)
+    {
+        buf[off + i] = static_cast<char>((val >> (i * 8)) & 0xff);
+    }
+}
+
+static std::vector<char> buildReadDimensionsTestArchive()
+{
+    const std::string fileName = "readDimensionsNullTestBase.abc";
+    {
+        Alembic::AbcCoreOgawa::WriteArchive w;
+        ABCA::ArchiveWriterPtr ar = w(fileName, ABCA::MetaData());
+        ABCA::CompoundPropertyWriterPtr props = ar->getTop()->getProperties();
+
+        ABCA::DataType i32dt(Alembic::Util::kInt32POD, 1);
+
+        // Property 0: 1D array (data >= 16 bytes, implicit empty dims).
+        ABCA::ArrayPropertyWriterPtr p1d =
+            props->createArrayProperty("arr1d", ABCA::MetaData(), i32dt, 0);
+        Alembic::Util::int32_t vals1d[4] = {10, 20, 30, 40};
+        p1d->setSample(ABCA::ArraySample(
+            vals1d, i32dt, Alembic::Util::Dimensions(4)));
+
+        // Property 1: 2D array (data >= 16 bytes, explicit 2x3 dims).
+        ABCA::ArrayPropertyWriterPtr p2d =
+            props->createArrayProperty("arr2d", ABCA::MetaData(), i32dt, 0);
+        Alembic::Util::int32_t vals2d[6] = {1, 2, 3, 4, 5, 6};
+        Alembic::Util::Dimensions dims2d;
+        dims2d.setRank(2);
+        dims2d[0] = 2;
+        dims2d[1] = 3;
+        p2d->setSample(ABCA::ArraySample(vals2d, i32dt, dims2d));
+
+        // Property 2: empty array (data < 16 bytes, implicit empty dims).
+        ABCA::ArrayPropertyWriterPtr pEmpty =
+            props->createArrayProperty("arrEmpty", ABCA::MetaData(), i32dt, 0);
+        pEmpty->setSample(ABCA::ArraySample(
+            NULL, i32dt, Alembic::Util::Dimensions(0)));
+    }
+
+    std::ifstream in(fileName.c_str(), std::ios::binary);
+    TESTING_ASSERT(in.good());
+    std::vector<char> bytes(
+        (std::istreambuf_iterator<char>(in)),
+        std::istreambuf_iterator<char>());
+    in.close();
+    std::remove(fileName.c_str());
+    TESTING_ASSERT(bytes.size() > 16);
+    return bytes;
+}
+
+static Alembic::Util::uint64_t findTopArrayPropGroupPos(
+    const std::vector<char>& bytes, std::size_t propIndex)
+{
+    const Alembic::Util::uint64_t kDataBit = 0x8000000000000000ULL;
+
+    // Ogawa header bytes [8..15] store the root group offset.
+    Alembic::Util::uint64_t rootPos = readU64LE(bytes, 8);
+    TESTING_ASSERT(rootPos != 0 && (rootPos & kDataBit) == 0);
+    TESTING_ASSERT(readU64LE(bytes, rootPos) > 2);
+
+    // Root child 2 is the top object group.
+    Alembic::Util::uint64_t topObjPos = readU64LE(bytes, rootPos + 8 + 2 * 8);
+    TESTING_ASSERT(topObjPos != 0 && (topObjPos & kDataBit) == 0);
+    TESTING_ASSERT(readU64LE(bytes, topObjPos) > 0);
+
+    // Top object child 0 is the top compound property group.
+    Alembic::Util::uint64_t topPropsPos = readU64LE(bytes, topObjPos + 8);
+    TESTING_ASSERT(topPropsPos != 0 && (topPropsPos & kDataBit) == 0);
+    TESTING_ASSERT(readU64LE(bytes, topPropsPos) > propIndex);
+
+    // Child propIndex is the target array property group.
+    Alembic::Util::uint64_t propPos =
+        readU64LE(bytes, topPropsPos + 8 + propIndex * 8);
+    TESTING_ASSERT(propPos != 0 && (propPos & kDataBit) == 0);
+    TESTING_ASSERT(readU64LE(bytes, propPos) == 2);
+    return propPos;
+}
+
+static void writeArchiveBytes(const std::string& fileName,
+                              const std::vector<char>& bytes)
+{
+    std::ofstream out(fileName.c_str(), std::ios::binary | std::ios::trunc);
+    TESTING_ASSERT(out.good());
+    out.write(&bytes[0], static_cast<std::streamsize>(bytes.size()));
+    out.close();
+    TESTING_ASSERT(out.good());
+}
+
+static void expectNullIDataPtrThrow(ABCA::ArrayPropertyReaderPtr prop)
+{
+    const std::string expected = "ReadDimensions invalid: Null IDataPtr.";
+    int sampleThrew = 0;
+    try
+    {
+        ABCA::ArraySamplePtr samp;
+        prop->getSample(0, samp);
+    }
+    catch (const std::exception& e)
+    {
+        TESTING_ASSERT(expected == e.what());
+        sampleThrew = 1;
+    }
+    TESTING_ASSERT(sampleThrew != 0);
+
+    int dimsThrew = 0;
+    try
+    {
+        Alembic::Util::Dimensions dims;
+        prop->getDimensions(0, dims);
+    }
+    catch (const std::exception& e)
+    {
+        TESTING_ASSERT(expected == e.what());
+        dimsThrew = 1;
+    }
+    TESTING_ASSERT(dimsThrew != 0);
+}
+
+void testReadDimensionsValidControl(bool iUseMMap)
+{
+    const std::string fileName = "readDimensionsValidControl.abc";
+    std::vector<char> bytes = buildReadDimensionsTestArchive();
+    writeArchiveBytes(fileName, bytes);
+
+    {
+        Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+        ABCA::ArchiveReaderPtr ar = r(fileName);
+        ABCA::CompoundPropertyReaderPtr props = ar->getTop()->getProperties();
+
+        ABCA::ArrayPropertyReaderPtr arr1d = props->getArrayProperty("arr1d");
+        TESTING_ASSERT(arr1d && arr1d->getNumSamples() != 0);
+        Alembic::Util::Dimensions d1;
+        arr1d->getDimensions(0, d1);
+        TESTING_ASSERT(d1.rank() == 1 && d1[0] == 4);
+        ABCA::ArraySamplePtr s1;
+        arr1d->getSample(0, s1);
+        TESTING_ASSERT(s1 && s1->size() == 4);
+        const Alembic::Util::int32_t* p1 =
+            static_cast<const Alembic::Util::int32_t*>(s1->getData());
+        TESTING_ASSERT(p1[0] == 10 && p1[1] == 20 && p1[2] == 30 && p1[3] == 40);
+
+        ABCA::ArrayPropertyReaderPtr arr2d = props->getArrayProperty("arr2d");
+        TESTING_ASSERT(arr2d && arr2d->getNumSamples() != 0);
+        Alembic::Util::Dimensions d2;
+        arr2d->getDimensions(0, d2);
+        TESTING_ASSERT(d2.rank() == 2 && d2[0] == 2 && d2[1] == 3);
+        ABCA::ArraySamplePtr s2;
+        arr2d->getSample(0, s2);
+        TESTING_ASSERT(s2 && s2->size() == 6);
+        const Alembic::Util::int32_t* p2 =
+            static_cast<const Alembic::Util::int32_t*>(s2->getData());
+        TESTING_ASSERT(p2[0] == 1 && p2[5] == 6);
+
+        ABCA::ArrayPropertyReaderPtr arrEmpty =
+            props->getArrayProperty("arrEmpty");
+        TESTING_ASSERT(arrEmpty && arrEmpty->getNumSamples() != 0);
+        Alembic::Util::Dimensions d0;
+        arrEmpty->getDimensions(0, d0);
+        TESTING_ASSERT(d0.numPoints() == 0);
+        ABCA::ArraySamplePtr s0;
+        arrEmpty->getSample(0, s0);
+        TESTING_ASSERT(s0 && s0->size() == 0);
+    }
+
+    std::remove(fileName.c_str());
+}
+
+void testReadDimensionsNullDataRejected(bool iUseMMap)
+{
+    const std::string fileName = "readDimensionsNullData.abc";
+    const Alembic::Util::uint64_t kDataBit = 0x8000000000000000ULL;
+    std::vector<char> bytes = buildReadDimensionsTestArchive();
+
+    // Clear the Ogawa data-marker bit on arr1d child 0 (sample data), so
+    // IGroup::getData(0) returns a null IDataPtr while child 1 (dims) stays valid.
+    Alembic::Util::uint64_t pos0 = findTopArrayPropGroupPos(bytes, 0);
+    Alembic::Util::uint64_t dataWord = readU64LE(bytes, pos0 + 8);
+    TESTING_ASSERT((dataWord & kDataBit) != 0);
+    writeU64LE(bytes, pos0 + 8, dataWord & ~kDataBit);
+    writeArchiveBytes(fileName, bytes);
+
+    {
+        Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+        ABCA::ArchiveReaderPtr ar = r(fileName);
+        ABCA::CompoundPropertyReaderPtr props = ar->getTop()->getProperties();
+
+        expectNullIDataPtrThrow(props->getArrayProperty("arr1d"));
+
+        // Uncorrupted sibling property remains readable.
+        ABCA::ArrayPropertyReaderPtr arr2d = props->getArrayProperty("arr2d");
+        TESTING_ASSERT(arr2d && arr2d->getNumSamples() != 0);
+        Alembic::Util::Dimensions d2;
+        arr2d->getDimensions(0, d2);
+        TESTING_ASSERT(d2.rank() == 2 && d2[0] == 2 && d2[1] == 3);
+    }
+
+    std::remove(fileName.c_str());
+}
+
+void testReadDimensionsNullDimsRejected(bool iUseMMap)
+{
+    const std::string fileName = "readDimensionsNullDims.abc";
+    const Alembic::Util::uint64_t kDataBit = 0x8000000000000000ULL;
+    std::vector<char> bytes = buildReadDimensionsTestArchive();
+
+    // Clear the Ogawa data-marker bit on child 1 (dimensions) for 1D (data>=16),
+    // 2D (data>=16), and empty (data<16) array properties.
+    for (std::size_t idx = 0; idx < 3; ++idx)
+    {
+        Alembic::Util::uint64_t pos = findTopArrayPropGroupPos(bytes, idx);
+        Alembic::Util::uint64_t dimsWord = readU64LE(bytes, pos + 16);
+        TESTING_ASSERT((dimsWord & kDataBit) != 0);
+        writeU64LE(bytes, pos + 16, dimsWord & ~kDataBit);
+    }
+    writeArchiveBytes(fileName, bytes);
+
+    {
+        Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+        ABCA::ArchiveReaderPtr ar = r(fileName);
+        ABCA::CompoundPropertyReaderPtr props = ar->getTop()->getProperties();
+
+        expectNullIDataPtrThrow(props->getArrayProperty("arr1d"));
+        expectNullIDataPtrThrow(props->getArrayProperty("arr2d"));
+        expectNullIDataPtrThrow(props->getArrayProperty("arrEmpty"));
+    }
+
+    std::remove(fileName.c_str());
+}
+
+void testReadDimensionsTruncatedGroupRejected(bool iUseMMap)
+{
+    const std::string fileName = "readDimensionsTruncGroup.abc";
+    std::vector<char> bytes = buildReadDimensionsTestArchive();
+
+    // Truncate arr1d group child count from 2 to 1: iData is valid, iDims is null.
+    Alembic::Util::uint64_t pos0 = findTopArrayPropGroupPos(bytes, 0);
+    writeU64LE(bytes, pos0, 1);
+
+    // Inflate arr2d group child count beyond stream size / 8 so IGroup resets
+    // numChildren to 0: both iData and iDims are null.
+    Alembic::Util::uint64_t pos1 = findTopArrayPropGroupPos(bytes, 1);
+    writeU64LE(bytes, pos1, static_cast<Alembic::Util::uint64_t>(bytes.size()));
+
+    writeArchiveBytes(fileName, bytes);
+
+    {
+        Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+        ABCA::ArchiveReaderPtr ar = r(fileName);
+        ABCA::CompoundPropertyReaderPtr props = ar->getTop()->getProperties();
+
+        expectNullIDataPtrThrow(props->getArrayProperty("arr1d"));
+        expectNullIDataPtrThrow(props->getArrayProperty("arr2d"));
+    }
+
+    std::remove(fileName.c_str());
+}
+
 void test_badver_pr463()
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, false);
@@ -1100,6 +1378,18 @@ int main ( int argc, char *argv[] )
     test_walkAllNoThrow(false);
 
     test_badver_pr463();
+
+    testReadDimensionsValidControl(true);
+    testReadDimensionsValidControl(false);
+
+    testReadDimensionsNullDataRejected(true);
+    testReadDimensionsNullDataRejected(false);
+
+    testReadDimensionsNullDimsRejected(true);
+    testReadDimensionsNullDimsRejected(false);
+
+    testReadDimensionsTruncatedGroupRejected(true);
+    testReadDimensionsTruncatedGroupRejected(false);
 
     return 0;
 }
