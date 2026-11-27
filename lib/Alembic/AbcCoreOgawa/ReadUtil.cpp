@@ -59,6 +59,11 @@ ReadDimensions( Ogawa::IDataPtr iDims,
                 const AbcA::DataType &iDataType,
                 Util::Dimensions & oDim )
 {
+    if ( !iDims || !iData )
+    {
+        ABCA_THROW("ReadDimensions invalid: Null IDataPtr.");
+    }
+
     if ( iData->getSize() < 16 )
     {
         oDim = Util::Dimensions( 0 );
